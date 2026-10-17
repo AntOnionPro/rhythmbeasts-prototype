@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen36moe-agente",
+  "instructions": ["docs/prototype.md"],
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "godot --headless *": "allow",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git push --force*": "deny",
+      "git reset --hard*": "deny",
+      "rm -rf *": "deny"
+    }
+  }
+}
