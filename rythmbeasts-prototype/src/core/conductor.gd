@@ -13,6 +13,7 @@ signal stopped
 ## Value = steps per beat.
 enum Subdivision { QUARTER = 1, EIGHTH = 2, SIXTEENTH = 4 }
 
+const BEATS_PER_BAR: int = 4
 const MUSIC_BUS: StringName = &"Music"
 const SILENT_VOLUME_LINEAR: float = 0.0
 const AUDIBLE_VOLUME_LINEAR: float = 1.0

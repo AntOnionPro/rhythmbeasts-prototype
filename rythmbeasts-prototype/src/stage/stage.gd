@@ -1,7 +1,7 @@
 class_name Stage
 extends Node2D
-## Reactive stage: platforms, spawn point, kill zone and a background that pulses on the beat,
-## flashes on every note and takes a layer's color while a combo layer plays.
+## Reactive stage: platforms, one spawn point per player, kill zone and a background that
+## pulses on the beat, flashes on every note and takes a layer's color while a combo layer plays.
 ## All animation derives from Conductor time, never from accumulated delta.
 
 ## Higher = sharper decay of the background pulse after each beat.
@@ -25,7 +25,8 @@ var _last_note_sec: float = -INF
 var _layer_end_sec: float = -INF
 var _layer_color: Color
 
-@onready var _spawn_point: Marker2D = %SpawnPoint
+@onready var _ground: Platform = %Ground
+@onready var _spawn_points: Array[Marker2D] = [%SpawnPoint1, %SpawnPoint2]
 @onready var _kill_zone: Area2D = %KillZone
 
 
@@ -61,8 +62,23 @@ func _draw() -> void:
 	draw_rect(get_viewport_rect(), color)
 
 
-func get_spawn_position() -> Vector2:
-	return _spawn_point.global_position
+func get_spawn_position(player_index: int) -> Vector2:
+	return _spawn_points[player_index].global_position
+
+
+## The main ground's area in global coordinates; its top edge is the walkable surface.
+func get_ground_rect() -> Rect2:
+	var top_left: Vector2 = _ground.global_position - Vector2(_ground.size.x / 2.0, 0.0)
+	return Rect2(top_left, _ground.size)
+
+
+## +1 (right) or -1 (left): spawned fighters face the middle of the stage.
+func get_spawn_facing(player_index: int) -> float:
+	var middle_x: float = 0.0
+	for spawn_point: Marker2D in _spawn_points:
+		middle_x += spawn_point.global_position.x
+	middle_x /= _spawn_points.size()
+	return 1.0 if get_spawn_position(player_index).x < middle_x else -1.0
 
 
 func _on_kill_zone_body_entered(body: Node2D) -> void:

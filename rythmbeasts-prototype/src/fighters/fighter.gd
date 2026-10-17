@@ -2,6 +2,9 @@ class_name Fighter
 extends CharacterBody2D
 ## Platform-fighter body: run, jump, air jumps, fast fall, drop-through platforms,
 ## light/heavy attacks and block. Origin is at the feet. Drawn by code.
+## Intentions come from its Controller child: human input or CPU.
+
+signal damage_changed(damage: float)
 
 ## Physics layer (1-based) fighters live on. Fighters do not collide with each other.
 const BODY_LAYER: int = 3
@@ -14,6 +17,8 @@ const SHIELD_WIDTH: float = 4.0
 const DROP_THROUGH_NUDGE: float = 1.0
 
 @export var config: FighterConfig
+## Input Map actions a human controller reads: <action_prefix>left, <action_prefix>jump, ...
+@export var action_prefix: String = "p1_"
 
 var _facing: float = 1.0
 var _air_jumps_left: int = 0
@@ -26,7 +31,7 @@ var _damage: float = 0.0
 var _hitstop_timer: float = 0.0
 var _hitstun_timer: float = 0.0
 
-@onready var _input: FighterInput = %Input
+@onready var _controller: FighterController = %Controller
 @onready var _collision: CollisionShape2D = %Collision
 @onready var _hurtbox: Hurtbox = %Hurtbox
 @onready var _hitbox: Hitbox = %Hitbox
@@ -46,6 +51,7 @@ func _ready() -> void:
 	_collision.position = Vector2(0.0, -config.body_size.y / 2.0)
 	_air_jumps_left = config.air_jumps
 
+	_controller.setup(self)
 	_hurtbox.setup(self, config.body_size)
 	_hurtbox.hit_received.connect(_on_hit_received)
 	_attack.setup(self, _hitbox, _hurtbox)
@@ -57,6 +63,7 @@ func _physics_process(delta: float) -> void:
 	if _hitstop_timer > 0.0:
 		_hitstop_timer -= delta
 		return
+	_controller.update(delta)
 	_update_timers(delta)
 	_attack.update(delta)
 	_handle_actions()
@@ -78,10 +85,12 @@ func _draw() -> void:
 		draw_rect(Rect2(-size.x / 2.0, -size.y, size.x, size.y), SHIELD_COLOR, false, SHIELD_WIDTH)
 
 
-## Places the fighter at position (feet) with movement and combat state reset.
-func respawn_at(spawn_position: Vector2) -> void:
+## Places the fighter at position (feet), facing +1 (right) or -1 (left),
+## with movement and combat state reset.
+func respawn_at(spawn_position: Vector2, facing: float = 1.0) -> void:
 	global_position = spawn_position
 	velocity = Vector2.ZERO
+	_facing = facing
 	_air_jumps_left = config.air_jumps
 	_coyote_timer = 0.0
 	_jump_buffer_timer = 0.0
@@ -92,6 +101,44 @@ func respawn_at(spawn_position: Vector2) -> void:
 	_attack.cancel()
 	_set_blocking(false)
 	_set_drop_through(false)
+	queue_redraw()
+	damage_changed.emit(_damage)
+
+
+func get_damage() -> float:
+	return _damage
+
+
+## Disabled controls read as neutral input; the body still falls and gets knocked back.
+func set_controls_enabled(enabled: bool) -> void:
+	_controller.enabled = enabled
+
+
+## Tells the controller who to fight and where the main ground is (used by the CPU).
+func set_opponent(opponent: Fighter, ground_rect: Rect2) -> void:
+	_controller.set_context(opponent, ground_rect)
+
+
+## +1 facing right, -1 facing left.
+func get_facing() -> float:
+	return _facing
+
+
+func is_attacking() -> bool:
+	return _attack.is_busy()
+
+
+func get_air_jumps_left() -> int:
+	return _air_jumps_left
+
+
+func is_on_one_way_platform() -> bool:
+	for i: int in get_slide_collision_count():
+		var collision: KinematicCollision2D = get_slide_collision(i)
+		var platform: Platform = collision.get_collider() as Platform
+		if platform != null and platform.one_way and collision.get_normal().y < 0.0:
+			return true
+	return false
 
 
 func _update_timers(delta: float) -> void:
@@ -106,12 +153,12 @@ func _update_timers(delta: float) -> void:
 
 func _handle_actions() -> void:
 	var can_act: bool = _hitstun_timer <= 0.0 and not _attack.is_busy()
-	_set_blocking(can_act and is_on_floor() and _input.is_block_held())
+	_set_blocking(can_act and is_on_floor() and _controller.is_block_held())
 	if not can_act or _is_blocking:
 		return
-	if _input.is_light_just_pressed():
+	if _controller.is_light_just_pressed():
 		_attack.start(_attack.light_attack, _facing)
-	elif _input.is_heavy_just_pressed():
+	elif _controller.is_heavy_just_pressed():
 		_attack.start(_attack.heavy_attack, _facing)
 
 
@@ -121,7 +168,7 @@ func _has_movement_control() -> bool:
 
 
 func _apply_horizontal(delta: float) -> void:
-	var axis: float = _input.get_move_axis() if _has_movement_control() else 0.0
+	var axis: float = _controller.get_move_axis() if _has_movement_control() else 0.0
 	var grounded: bool = is_on_floor()
 	var rate: float
 	if not is_zero_approx(axis):
@@ -144,7 +191,7 @@ func _apply_gravity(delta: float) -> void:
 func _handle_jump() -> void:
 	if not _has_movement_control():
 		return
-	if _input.is_jump_just_pressed():
+	if _controller.is_jump_just_pressed():
 		_jump_buffer_timer = config.jump_buffer_sec
 
 	if _jump_buffer_timer > 0.0:
@@ -156,15 +203,15 @@ func _handle_jump() -> void:
 			_air_jumps_left -= 1
 			_consume_jump()
 
-	if _input.is_jump_just_released() and velocity.y < 0.0:
+	if _controller.is_jump_just_released() and velocity.y < 0.0:
 		velocity.y *= config.jump_cut_multiplier
 
 
 func _handle_down() -> void:
-	if not _has_movement_control() or not _input.is_down_just_pressed():
+	if not _has_movement_control() or not _controller.is_down_just_pressed():
 		return
 	if is_on_floor():
-		if _is_on_one_way_platform():
+		if is_on_one_way_platform():
 			_set_drop_through(true)
 			_drop_through_timer = config.drop_through_sec
 			position.y += DROP_THROUGH_NUDGE
@@ -185,15 +232,6 @@ func _on_grounded() -> void:
 	_is_fast_falling = false
 
 
-func _is_on_one_way_platform() -> bool:
-	for i: int in get_slide_collision_count():
-		var collision: KinematicCollision2D = get_slide_collision(i)
-		var platform: Platform = collision.get_collider() as Platform
-		if platform != null and platform.one_way and collision.get_normal().y < 0.0:
-			return true
-	return false
-
-
 func _set_drop_through(enabled: bool) -> void:
 	set_collision_mask_value(Platform.ONE_WAY_LAYER, not enabled)
 	if not enabled:
@@ -210,6 +248,7 @@ func _set_blocking(enabled: bool) -> void:
 
 func _on_hit_received(attack: AttackData, _attacker: Node2D, direction: float) -> void:
 	_damage += attack.damage
+	damage_changed.emit(_damage)
 	velocity = attack.get_knockback(_damage, direction)
 	_hitstop_timer = attack.hitstop_sec
 	_hitstun_timer = attack.hitstun_sec

@@ -10,6 +10,7 @@ size = Vector2(4000, 200)
 script = ExtResource("1_stage")
 
 [node name="Ground" parent="." instance=ExtResource("2_platform")]
+unique_name_in_owner = true
 position = Vector2(576, 500)
 size = Vector2(800, 40)
 one_way = false
@@ -26,9 +27,13 @@ size = Vector2(220, 16)
 position = Vector2(576, 240)
 size = Vector2(240, 16)
 
-[node name="SpawnPoint" type="Marker2D" parent="."]
+[node name="SpawnPoint1" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(576, 500)
+position = Vector2(420, 500)
+
+[node name="SpawnPoint2" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(732, 500)
 
 [node name="KillZone" type="Area2D" parent="."]
 unique_name_in_owner = true

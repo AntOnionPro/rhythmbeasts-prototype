@@ -4,15 +4,21 @@
 [ext_resource type="Resource" path="res://src/music/clock_loop_140bpm.tres" id="2_track"]
 [ext_resource type="PackedScene" path="res://src/stage/stage.tscn" id="3_stage"]
 [ext_resource type="PackedScene" path="res://src/fighters/fighter.tscn" id="4_fighter"]
-[ext_resource type="PackedScene" path="res://src/combat/training_dummy.tscn" id="5_dummy"]
+[ext_resource type="PackedScene" path="res://src/fighters/cpu_fighter.tscn" id="19_cpu_fighter"]
+[ext_resource type="Resource" path="res://src/fighters/p2_fighter.tres" id="5_p2_config"]
 [ext_resource type="Script" path="res://src/music/music_director.gd" id="6_director"]
-[ext_resource type="Resource" path="res://src/music/default_sound_bank.tres" id="7_bank"]
-[ext_resource type="Resource" path="res://src/music/normal.tres" id="8_difficulty"]
-[ext_resource type="PackedScene" path="res://src/ui/debug_hud.tscn" id="9_hud"]
-[ext_resource type="Script" path="res://src/music/combo_tracker.gd" id="10_tracker"]
-[ext_resource type="Script" path="res://src/music/combo_data.gd" id="11_combo_data"]
-[ext_resource type="Resource" path="res://src/music/wobble_combo.tres" id="12_wobble"]
-[ext_resource type="Resource" path="res://src/music/drop_combo.tres" id="13_drop"]
+[ext_resource type="Script" path="res://src/music/sound_bank.gd" id="7_sound_bank"]
+[ext_resource type="Resource" path="res://src/music/default_sound_bank.tres" id="8_p1_voice"]
+[ext_resource type="Resource" path="res://src/music/p2_sound_bank.tres" id="9_p2_voice"]
+[ext_resource type="Resource" path="res://src/music/normal.tres" id="10_difficulty"]
+[ext_resource type="Script" path="res://src/music/combo_tracker.gd" id="11_tracker"]
+[ext_resource type="Script" path="res://src/music/combo_data.gd" id="12_combo_data"]
+[ext_resource type="Resource" path="res://src/music/wobble_combo.tres" id="13_wobble"]
+[ext_resource type="Resource" path="res://src/music/drop_combo.tres" id="14_drop"]
+[ext_resource type="Script" path="res://src/match/match_director.gd" id="15_match"]
+[ext_resource type="Resource" path="res://src/match/default_match.tres" id="16_match_config"]
+[ext_resource type="PackedScene" path="res://src/ui/match_hud.tscn" id="17_match_hud"]
+[ext_resource type="PackedScene" path="res://src/ui/debug_hud.tscn" id="18_debug_hud"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -21,22 +27,31 @@ music_track = ExtResource("2_track")
 [node name="Stage" parent="." instance=ExtResource("3_stage")]
 unique_name_in_owner = true
 
-[node name="Fighter" parent="." instance=ExtResource("4_fighter")]
+[node name="Fighter1" parent="." instance=ExtResource("4_fighter")]
 unique_name_in_owner = true
 
-[node name="TrainingDummy" parent="." instance=ExtResource("5_dummy")]
-position = Vector2(760, 500)
+[node name="Fighter2" parent="." instance=ExtResource("19_cpu_fighter")]
+unique_name_in_owner = true
+config = ExtResource("5_p2_config")
 
 [node name="MusicDirector" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_director")
-sound_bank = ExtResource("7_bank")
-difficulty = ExtResource("8_difficulty")
+voices = Array[ExtResource("7_sound_bank")]([ExtResource("8_p1_voice"), ExtResource("9_p2_voice")])
+difficulty = ExtResource("10_difficulty")
 
 [node name="ComboTracker" type="Node" parent="."]
 unique_name_in_owner = true
-script = ExtResource("10_tracker")
-combos = Array[ExtResource("11_combo_data")]([ExtResource("12_wobble"), ExtResource("13_drop")])
+script = ExtResource("11_tracker")
+combos = Array[ExtResource("12_combo_data")]([ExtResource("13_wobble"), ExtResource("14_drop")])
 
-[node name="DebugHud" parent="." instance=ExtResource("9_hud")]
+[node name="MatchDirector" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("15_match")
+config = ExtResource("16_match_config")
+
+[node name="MatchHud" parent="." instance=ExtResource("17_match_hud")]
+unique_name_in_owner = true
+
+[node name="DebugHud" parent="." instance=ExtResource("18_debug_hud")]
 unique_name_in_owner = true

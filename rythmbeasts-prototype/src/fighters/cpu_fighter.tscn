@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://src/fighters/fighter.tscn" id="1_fighter"]
+[ext_resource type="Script" path="res://src/fighters/cpu_controller.gd" id="2_cpu"]
+[ext_resource type="Resource" path="res://src/fighters/default_cpu.tres" id="3_profile"]
+
+[node name="CpuFighter" instance=ExtResource("1_fighter")]
+
+[node name="Controller" parent="." index="1"]
+script = ExtResource("2_cpu")
+profile = ExtResource("3_profile")

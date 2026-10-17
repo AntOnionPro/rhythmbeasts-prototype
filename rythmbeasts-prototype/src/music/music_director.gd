@@ -4,11 +4,12 @@ extends Node
 ## (using the moment the attack was pressed) and its sample is scheduled on the next
 ## reachable grid step, triggered early by the output latency so it is heard on the step.
 ## Completed combos add layers (wobble, drop) that start on the next bar.
+## Each player has a voice (SoundBank) so both can be told apart in the music.
 
 const MS_PER_SECOND: float = 1000.0
-const BEATS_PER_BAR: int = 4
 
-@export var sound_bank: SoundBank
+## One SoundBank per player, in player order. Attackers without a voice use the first.
+@export var voices: Array[SoundBank] = []
 @export var difficulty: DifficultyProfile
 ## Grid hit sounds snap to.
 @export var sound_subdivision: Conductor.Subdivision = Conductor.Subdivision.SIXTEENTH
@@ -21,7 +22,8 @@ const BEATS_PER_BAR: int = 4
 var _player: AudioStreamPlayer
 var _playback: AudioStreamPlaybackPolyphonic
 var _pending: Array[ScheduledNote] = []
-var _round_robin: Dictionary[StringName, int] = {}
+var _round_robin: Dictionary[SoundBankEntry, int] = {}
+var _voice_indices: Dictionary[Node2D, int] = {}
 var _press_times: Dictionary[Node2D, float] = {}
 ## Playing layer streams: sound id -> polyphonic stream id.
 var _active_layers: Dictionary[StringName, int] = {}
@@ -76,6 +78,11 @@ func _process(_delta: float) -> void:
 			i += 1
 
 
+## attacker's hits and combo layers use voices[voice_index].
+func assign_voice(attacker: Node2D, voice_index: int) -> void:
+	_voice_indices[attacker] = voice_index
+
+
 ## Earliest song time at which a sound started now can be heard.
 func _get_lookahead_sec() -> float:
 	return Conductor.beat_to_time_sec(Conductor.get_lookahead_position_beats())
@@ -91,18 +98,19 @@ func _schedule_time_sec(earliest_sec: float) -> float:
 
 
 func _next_bar_time_sec(earliest_sec: float) -> float:
-	var bar: float = ceilf(Conductor.time_sec_to_beat(earliest_sec) / BEATS_PER_BAR)
-	return Conductor.beat_to_time_sec(bar * BEATS_PER_BAR)
+	var bar: float = ceilf(Conductor.time_sec_to_beat(earliest_sec) / Conductor.BEATS_PER_BAR)
+	return Conductor.beat_to_time_sec(bar * Conductor.BEATS_PER_BAR)
 
 
 func _next_sample(entry: SoundBankEntry) -> AudioStream:
-	var index: int = _round_robin.get(entry.sound_id, 0)
-	_round_robin[entry.sound_id] = index + 1
+	var index: int = _round_robin.get(entry, 0)
+	_round_robin[entry] = index + 1
 	return entry.samples[index % entry.samples.size()]
 
 
-func _find_entry(sound_id: StringName) -> SoundBankEntry:
-	var entry: SoundBankEntry = sound_bank.find_entry(sound_id)
+func _find_entry(attacker: Node2D, sound_id: StringName) -> SoundBankEntry:
+	var voice: SoundBank = voices[_voice_indices.get(attacker, 0)]
+	var entry: SoundBankEntry = voice.find_entry(sound_id)
 	if entry == null or entry.samples.is_empty():
 		push_warning("MusicDirector: no samples for sound id '%s'." % sound_id)
 		return null
@@ -151,7 +159,7 @@ func _on_hit_landed(attacker: Node2D, _target: Node2D, attack: AttackData) -> vo
 	var on_time: bool = absf(judge.offset_ms) <= difficulty.window_ms
 	EventBus.hit_judged.emit(attacker, attack, on_time, judge.offset_ms)
 
-	var entry: SoundBankEntry = _find_entry(attack.id)
+	var entry: SoundBankEntry = _find_entry(attacker, attack.id)
 	if entry != null:
 		var note: ScheduledNote = ScheduledNote.new()
 		note.time_sec = _schedule_time_sec(_get_lookahead_sec())
@@ -175,7 +183,7 @@ func _on_combo_finished(attacker: Node2D, combo: ComboData) -> void:
 	EventBus.combo_finished.emit(attacker, combo)
 	if _is_layer_pending(combo.reward_sound_id):
 		return
-	var entry: SoundBankEntry = _find_entry(combo.reward_sound_id)
+	var entry: SoundBankEntry = _find_entry(attacker, combo.reward_sound_id)
 	if entry == null:
 		return
 	var note: ScheduledNote = ScheduledNote.new()

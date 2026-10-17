@@ -16,3 +16,7 @@ signal combo_finished(attacker: Node2D, combo: ComboData)
 signal combo_broken(attacker: Node2D)
 ## A combo layer (wobble, drop) started playing, on a bar.
 signal music_layer_started(sound_id: StringName, duration_sec: float)
+## The countdown finished and fighters can act.
+signal match_started
+## winner_index is MatchDirector.DRAW (-1) when nobody wins.
+signal match_finished(winner_index: int)
