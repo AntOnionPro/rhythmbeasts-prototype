@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/fighters/fighter.gd" id="1_fighter"]
+[ext_resource type="Script" path="res://src/fighters/fighter_input.gd" id="2_input"]
+[ext_resource type="Resource" path="res://src/fighters/default_fighter.tres" id="3_config"]
+[ext_resource type="Script" path="res://src/combat/hurtbox.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://src/combat/hitbox.gd" id="5_hitbox"]
+[ext_resource type="Script" path="res://src/combat/fighter_attack.gd" id="6_attack"]
+[ext_resource type="Resource" path="res://src/combat/light_attack.tres" id="7_light"]
+[ext_resource type="Resource" path="res://src/combat/heavy_attack.tres" id="8_heavy"]
+
+[node name="Fighter" type="CharacterBody2D"]
+script = ExtResource("1_fighter")
+config = ExtResource("3_config")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+
+[node name="Input" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_input")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_hurtbox")
+
+[node name="Hitbox" type="Area2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_hitbox")
+
+[node name="Attack" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_attack")
+light_attack = ExtResource("7_light")
+heavy_attack = ExtResource("8_heavy")

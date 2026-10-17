@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DifficultyProfile" format=3]
+
+[ext_resource type="Script" path="res://src/music/difficulty_profile.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Hard"
+window_ms = 30.0
+judge_subdivision = 2
+off_window_rule = 2

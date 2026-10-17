@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://dvjr4de6epo5f"]
+
+[ext_resource type="Script" uid="uid://b68r0ccd2qlog" path="res://tests/manual/conductor_sync_test.gd" id="1_script"]
+[ext_resource type="Resource" path="res://src/music/clock_loop_140bpm.tres" id="2_track"]
+[ext_resource type="AudioStream" uid="uid://cryhhlg5r45cq" path="res://assets/audio/sfx/metronome_click.wav" id="3_click"]
+
+[node name="ConductorSyncTest" type="Node2D" unique_id=604968681]
+script = ExtResource("1_script")
+track = ExtResource("2_track")
+
+[node name="Click" type="AudioStreamPlayer" parent="." unique_id=661632833]
+unique_name_in_owner = true
+stream = ExtResource("3_click")
+bus = &"SFX"
+
+[node name="Info" type="Label" parent="." unique_id=81803344]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 416.0
+offset_bottom = 136.0

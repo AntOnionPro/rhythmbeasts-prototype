@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AttackData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/attack_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"light"
+damage = 4.0
+startup_sec = 0.05
+active_sec = 0.08
+recovery_sec = 0.12
+hitbox_size = Vector2(56, 32)
+hitbox_offset = Vector2(44, -44)
+knockback = Vector2(260, -180)
+knockback_growth = 0.01
+hitstop_sec = 0.06
+hitstun_sec = 0.2

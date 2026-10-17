@@ -37,11 +37,15 @@ tiempo real, y el escenario reacciona a esa música.
   - Finisher de combo → drop.
 
 ## Dificultad (valores iniciales, a ajustar jugando)
-| Nivel   | Ventana de timing | Golpe fuera de tiempo |
-|---------|-------------------|-----------------------|
-| Fácil   | Amplia            | Se cuantiza al beat más cercano |
-| Normal  | Media             | Suena, pero no suma al combo musical |
-| Difícil | Estrecha          | No suena y rompe el combo |
+El sonido de un golpe siempre cae en la rejilla de beat, sea cual sea la dificultad
+(se programa en el siguiente paso de la rejilla). La dificultad solo decide si el golpe
+cuenta para el combo musical.
+
+| Nivel   | Ventana de timing | Golpe fuera de ventana |
+|---------|-------------------|------------------------|
+| Fácil   | Amplia            | Suena en la rejilla y cuenta para el combo |
+| Normal  | Media             | Suena en la rejilla, pero no suma al combo musical |
+| Difícil | Estrecha          | Suena en la rejilla, pero rompe el combo |
 
 Cada nivel es un `DifficultyProfile` (.tres). No aplica a un futuro modo online.
 

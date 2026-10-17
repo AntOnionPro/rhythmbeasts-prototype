@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="SoundBank" format=3]
+
+[ext_resource type="Script" path="res://src/music/sound_bank.gd" id="1_bank"]
+[ext_resource type="Script" path="res://src/music/sound_bank_entry.gd" id="2_entry"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/perc_light_1.wav" id="3_light1"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/perc_light_2.wav" id="4_light2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/perc_light_3.wav" id="5_light3"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/bass_heavy_f2.wav" id="6_bass_f2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/bass_heavy_ab2.wav" id="7_bass_ab2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/bass_heavy_eb2.wav" id="8_bass_eb2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/wobble_f.wav" id="9_wobble"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/drop_f.wav" id="10_drop"]
+
+[sub_resource type="Resource" id="Resource_light"]
+script = ExtResource("2_entry")
+sound_id = &"light"
+samples = Array[AudioStream]([ExtResource("3_light1"), ExtResource("4_light2"), ExtResource("5_light3")])
+volume_db = -3.0
+
+[sub_resource type="Resource" id="Resource_heavy"]
+script = ExtResource("2_entry")
+sound_id = &"heavy"
+samples = Array[AudioStream]([ExtResource("6_bass_f2"), ExtResource("6_bass_f2"), ExtResource("7_bass_ab2"), ExtResource("8_bass_eb2")])
+volume_db = 0.0
+
+[sub_resource type="Resource" id="Resource_wobble"]
+script = ExtResource("2_entry")
+sound_id = &"wobble"
+samples = Array[AudioStream]([ExtResource("9_wobble")])
+volume_db = -4.0
+
+[sub_resource type="Resource" id="Resource_drop"]
+script = ExtResource("2_entry")
+sound_id = &"drop"
+samples = Array[AudioStream]([ExtResource("10_drop")])
+volume_db = -2.0
+
+[resource]
+script = ExtResource("1_bank")
+entries = Array[ExtResource("2_entry")]([SubResource("Resource_light"), SubResource("Resource_heavy"), SubResource("Resource_wobble"), SubResource("Resource_drop")])

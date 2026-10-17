@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/combat/training_dummy.gd" id="1_dummy"]
+[ext_resource type="Script" path="res://src/combat/hurtbox.gd" id="2_hurtbox"]
+
+[node name="TrainingDummy" type="CharacterBody2D"]
+script = ExtResource("1_dummy")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+
+[node name="Hurtbox" type="Area2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_hurtbox")
