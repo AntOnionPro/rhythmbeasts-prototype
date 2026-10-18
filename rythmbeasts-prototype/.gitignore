@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Original music files (full songs, stems): only the cut pieces are committed
+/assets/audio/source/*
+!/assets/audio/source/.gdignore

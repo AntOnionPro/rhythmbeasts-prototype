@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MusicTrack" format=3]
+
+[ext_resource type="Script" path="res://src/music/music_track.gd" id="1_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/hme_loop_bars17-32.wav" id="2_stream"]
+
+[resource]
+script = ExtResource("1_script")
+stream = ExtResource("2_stream")
+bpm = 150.0
+length_beats = 64
+first_beat_offset_sec = 0.0

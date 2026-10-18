@@ -4,6 +4,8 @@ extends Node
 ## (using the moment the attack was pressed) and its sample is scheduled on the next
 ## reachable grid step, triggered early by the output latency so it is heard on the step.
 ## Completed combos add layers (wobble, drop) that start on the next bar.
+## A finisher (drop) unlocks the base track: it stays silent while the drop plays and
+## comes in when the drop ends.
 ## Each player has a voice (SoundBank) so both can be told apart in the music.
 
 const MS_PER_SECOND: float = 1000.0
@@ -18,6 +20,10 @@ const MS_PER_SECOND: float = 1000.0
 @export var late_tolerance_ms: float = 25.0
 @export var max_polyphony: int = 16
 @export var bus: StringName = &"Music"
+## Base track volume once a finisher has unlocked it.
+@export_range(0.0, 1.0) var base_track_volume_linear: float = 0.5
+## Fade used to mute the base track under a finisher and to bring it back after it.
+@export var base_track_fade_sec: float = 0.03
 
 var _player: AudioStreamPlayer
 var _playback: AudioStreamPlaybackPolyphonic
@@ -27,6 +33,10 @@ var _voice_indices: Dictionary[Node2D, int] = {}
 var _press_times: Dictionary[Node2D, float] = {}
 ## Playing layer streams: sound id -> polyphonic stream id.
 var _active_layers: Dictionary[StringName, int] = {}
+## Song time at which the playing finisher ends and the base track comes in; -INF if none.
+var _base_track_return_sec: float = -INF
+var _base_track_volume: float = 0.0
+var _base_track_tween: Tween
 
 @onready var _combo_tracker: ComboTracker = %ComboTracker
 
@@ -63,11 +73,14 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _pending.is_empty() or not Conductor.is_running():
+	if not Conductor.is_running():
 		return
 	var lookahead_sec: float = _get_lookahead_sec()
 	# Trigger when the target is closer than half a frame: error stays within +-half a frame.
 	var half_frame_sec: float = get_process_delta_time() / 2.0
+	if _base_track_return_sec != -INF and _base_track_return_sec - lookahead_sec <= half_frame_sec:
+		_base_track_return_sec = -INF
+		_fade_base_track(base_track_volume_linear)
 	var i: int = 0
 	while i < _pending.size():
 		var note: ScheduledNote = _pending[i]
@@ -134,6 +147,9 @@ func _play(note: ScheduledNote) -> void:
 		for layer_id: StringName in _active_layers:
 			_playback.stop_stream(_active_layers[layer_id])
 		_active_layers.clear()
+		# Both players share the output, so muting now lines up with the drop's start.
+		_fade_base_track(0.0)
+		_base_track_return_sec = note.time_sec + note.stream.get_length()
 	elif _active_layers.has(note.layer_id):
 		_playback.stop_stream(_active_layers[note.layer_id])
 	_active_layers[note.layer_id] = _playback.play_stream(
@@ -141,10 +157,27 @@ func _play(note: ScheduledNote) -> void:
 	EventBus.music_layer_started.emit(note.layer_id, note.stream.get_length())
 
 
+func _fade_base_track(target: float) -> void:
+	if _base_track_tween != null:
+		_base_track_tween.kill()
+	_base_track_tween = create_tween()
+	_base_track_tween.tween_method(_set_base_track_volume, _base_track_volume, target, base_track_fade_sec)
+
+
+func _set_base_track_volume(value: float) -> void:
+	_base_track_volume = value
+	Conductor.set_track_volume_linear(value)
+
+
 func _on_conductor_started() -> void:
 	_pending.clear()
 	_press_times.clear()
 	_combo_tracker.reset()
+	# Conductor.start() restarts the base track silent.
+	if _base_track_tween != null:
+		_base_track_tween.kill()
+	_base_track_volume = 0.0
+	_base_track_return_sec = -INF
 
 
 func _on_attack_started(attacker: Node2D, _attack: AttackData) -> void:

@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="SoundBank" format=3]
+
+[ext_resource type="Script" path="res://src/music/sound_bank.gd" id="1_bank"]
+[ext_resource type="Script" path="res://src/music/sound_bank_entry.gd" id="2_entry"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/light_perc_01.wav" id="3_light1"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/light_perc_02.wav" id="4_light2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/light_perc_03.wav" id="5_light3"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/light_perc_04.wav" id="6_light4"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/heavy_growl_01.wav" id="7_heavy1"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/heavy_growl_02.wav" id="8_heavy2"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/heavy_growl_03.wav" id="9_heavy3"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/heavy_growl_05.wav" id="10_heavy4"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/wobble_a_bars41-42.wav" id="11_wobble"]
+[ext_resource type="AudioStream" path="res://assets/audio/samples/hard_mode_engaged/drop_a_bars81-88.wav" id="12_drop"]
+
+[sub_resource type="Resource" id="Resource_light"]
+script = ExtResource("2_entry")
+sound_id = &"light"
+samples = Array[AudioStream]([ExtResource("3_light1"), ExtResource("4_light2"), ExtResource("5_light3"), ExtResource("6_light4")])
+volume_db = -6.0
+
+[sub_resource type="Resource" id="Resource_heavy"]
+script = ExtResource("2_entry")
+sound_id = &"heavy"
+samples = Array[AudioStream]([ExtResource("7_heavy1"), ExtResource("8_heavy2"), ExtResource("9_heavy3"), ExtResource("10_heavy4")])
+volume_db = -4.0
+
+[sub_resource type="Resource" id="Resource_wobble"]
+script = ExtResource("2_entry")
+sound_id = &"wobble"
+samples = Array[AudioStream]([ExtResource("11_wobble")])
+volume_db = -4.0
+
+[sub_resource type="Resource" id="Resource_drop"]
+script = ExtResource("2_entry")
+sound_id = &"drop"
+samples = Array[AudioStream]([ExtResource("12_drop")])
+volume_db = -2.0
+
+[resource]
+script = ExtResource("1_bank")
+entries = Array[ExtResource("2_entry")]([SubResource("Resource_light"), SubResource("Resource_heavy"), SubResource("Resource_wobble"), SubResource("Resource_drop")])
