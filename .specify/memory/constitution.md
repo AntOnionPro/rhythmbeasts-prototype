@@ -95,8 +95,10 @@ provisionales se sustituirán por la música final.
   clases `RefCounted`) para poder testearla sin audio real.
 - El resto (game feel, movimiento, escenario, HUD) se valida con playtest manual siguiendo los
   criterios de aceptación de la spec. Las escenas de `tests/manual/` se mantienen como apoyo.
-- TODO(TEST_FRAMEWORK): el addon de tests (GUT o gdUnit4) aún no está elegido ni instalado; se
-  decide e instala en su propia feature antes de cualquier otra que toque el núcleo rítmico.
+- Framework: GUT 9.7.1 (versión para Godot 4.7.x) en `addons/gut/`, ejecutado por línea de
+  comandos sin activar el plugin del editor. Los tests unitarios viven en `tests/unit/` y la
+  suite se lanza con el comando documentado en `CLAUDE.md`, que MUST importar el proyecto antes
+  de ejecutar GUT y MUST terminar con un código distinto de 0 si algún test falla o no carga.
 
 **Razón**: el timing es el riesgo crítico del juego y verificarlo de oído es lento y poco
 fiable; el resto se juzga mejor jugando.
@@ -153,4 +155,4 @@ fiable; el resto se juzga mejor jugando.
   violaciones de reglas MUST como críticas.
 - **Revisión**: la constitución se revisa al cerrar cada fase del proyecto.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.0.1 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04

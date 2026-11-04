@@ -28,6 +28,18 @@ dubstep en tiempo real y el escenario reacciona a la música.
 - Informa de errores y warnings. Una tarea no está hecha mientras la validación falle.
 - No abras el editor ni la ventana del juego salvo que se pida.
 
+## Tests
+
+- Suite completa (GUT 9.7.1, sin ventana), desde la raíz del repo:
+  `godot --headless --path rythmbeasts-prototype --import && godot --headless --path rythmbeasts-prototype -s res://addons/gut/gut_cmdln.gd`
+- La importación previa es obligatoria: sin ella Godot puede terminar con 0 sin haber ejecutado
+  ningún test. Código de salida: 0 si todo pasa; 1 si algún test falla, no carga o no hay tests.
+- Convención: `rythmbeasts-prototype/tests/unit/<feature de src>/test_<pieza>.gd`, que extiende
+  `GutTest`, con métodos `test_<comportamiento>() -> void`. Se descubren solos; no toques
+  `.gutconfig.json` para añadir tests.
+- Una tarea que toque el núcleo rítmico (tiempo, cuantización, juicio de timing, combos) no está
+  hecha con tests en rojo (constitución, principio VI).
+
 ## Nunca
 
 - Editar o borrar `.godot/`, `*.import`, `*.uid`, atributos `uid=` o ids de `ext_resource`.
